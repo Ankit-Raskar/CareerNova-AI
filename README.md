@@ -1,134 +1,213 @@
-CareerNova AI 🚀
+# CareerNova AI 🚀
 
-CareerNova AI is a modern AI-powered career development platform built to help students and developers grow their careers with smart tools, job discovery, AI mentorship, resume analysis, learning resources, and career guidance — all in one place.
+CareerNova AI is a modern AI-powered career development platform designed to help students, developers, and job seekers grow their careers using intelligent tools, AI guidance, job discovery, resume analysis, and learning resources — all in one platform.
 
-🌟 Features
-🤖 AI Mentor
+---
 
-Get instant career guidance powered by AI.
-Ask questions about:
+# 🌟 Features
 
-Frontend Development
-Backend Development
-AI/ML
-Career Roadmaps
-Interview Preparation
-Resume Tips
-Learning Paths
-📄 Resume Analyzer
+## 🤖 AI Mentor
 
-Upload your resume and get:
+An intelligent AI-powered mentor that helps users with:
 
-ATS Score
-Keyword Analysis
-Skill Gap Detection
-Career Fit Suggestions
-Resume Improvement Tips
+* Career guidance
+* Learning roadmaps
+* Technology recommendations
+* Interview preparation
+* Coding advice
+* Skill development
+* Career planning
 
 Powered by Groq Llama AI.
 
-💼 Jobs & Internships
+---
 
-Search for:
+## 📄 Resume Analyzer
 
-Remote Jobs
-Internships
-AI Jobs
-Frontend/Backend Roles
-Full-Time Opportunities
+Upload your resume and receive:
+
+* ATS Score Analysis
+* Skill Gap Detection
+* Resume Feedback
+* Keyword Optimization
+* Career Fit Suggestions
+* Improvement Recommendations
+
+---
+
+## 💼 Jobs & Internships
+
+Search and explore:
+
+* Remote Jobs
+* AI/ML Roles
+* Frontend & Backend Jobs
+* Internships
+* Full-Time Opportunities
+* International Opportunities
 
 Integrated with real job APIs.
 
-📚 Resources & Learning Hub
+---
 
-Discover:
+## 📚 Resources & Learning Hub
 
-Free Books
-Programming Resources
-Learning Platforms
-Career Materials
-Educational Content
-🧠 AI Career Quiz
+Access:
 
-Take an intelligent career quiz and get:
+* Programming Books
+* Learning Resources
+* Educational Platforms
+* Career Materials
+* Development Guides
+* Curated Learning Content
 
-Career Recommendations
-Skill-Based Suggestions
-Domain Matching
-Personalized Career Paths
-🛣️ Career Roadmaps
+---
 
-Explore learning roadmaps for:
+## 🧠 AI Career Quiz
 
-Web Development
-AI Engineering
-Data Science
-Cybersecurity
-App Development
-Cloud Engineering
-🛠️ Tech Stack
-Frontend
-React.js
-Vite
-TypeScript
-Tailwind CSS
-Framer Motion
-Backend
-Vercel Serverless Functions
-Supabase
-APIs & AI
-Groq API
-Adzuna Jobs API
-Open Library API
-🔐 Authentication
-Supabase Authentication
-Secure Login & Signup
-Session Management
-🌐 Live Demo
+Take a smart AI-based quiz to discover:
 
-CareerNova AI Live Website
+* Best career paths
+* Suitable tech domains
+* Personalized recommendations
+* Strength analysis
+* Learning directions
 
-⚡ Installation
+---
 
-Clone the repository:
+## 🛣️ Career Roadmaps
 
+Explore roadmaps for:
+
+* Frontend Development
+* Backend Development
+* Full Stack Development
+* AI Engineering
+* Data Science
+* Cybersecurity
+* Cloud Computing
+* App Development
+
+---
+
+# 🛠️ Tech Stack
+
+## Frontend
+
+* React.js
+* Vite
+* TypeScript
+* Tailwind CSS
+* Framer Motion
+
+## Backend
+
+* Vercel Serverless Functions
+* Supabase
+
+## APIs & AI
+
+* Groq API
+* Adzuna API
+* Open Library API
+
+---
+
+# 🔐 Authentication
+
+* Supabase Authentication
+* Secure Login & Signup
+* Protected Routes
+* Session Management
+
+---
+
+# 🌐 Live Demo
+
+https://career-nova-ai-ryoo.vercel.app/
+
+---
+
+# ⚡ Installation
+
+## Clone Repository
+
+```bash
 git clone https://github.com/Ankit-Raskar/CareerNova-AI.git
+```
 
-Install dependencies:
+---
 
+## Navigate to Project Folder
+
+```bash
+cd CareerNova-AI
+```
+
+---
+
+## Install Dependencies
+
+```bash
 npm install
+```
 
-Run development server:
+---
 
+## Start Development Server
+
+```bash
 npm run dev
-🔑 Environment Variables
+```
 
-Create a .env file and add:
+---
 
+# 🔑 Environment Variables
+
+Create a `.env` file in the root directory and add:
+
+```env
 VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_key
+
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 
 GROQ_API_KEY=your_groq_api_key
 
 ADZUNA_APP_ID=your_adzuna_app_id
+
 ADZUNA_APP_KEY=your_adzuna_app_key
-🚀 Deployment
+```
+
+---
+
+# 🚀 Deployment
 
 This project is deployed using:
 
-GitHub
-Vercel
-📌 Future Improvements
-AI Mock Interviews
-Resume Builder
-Portfolio Generator
-Skill Tracking Dashboard
-Community Features
-AI Voice Mentor
-## 👨‍💻 Developer
+* GitHub
+* Vercel
 
-**Ankit Raskar**
+---
+
+# 📌 Future Improvements
+
+* AI Mock Interviews
+* Resume Builder
+* Portfolio Generator
+* AI Voice Mentor
+* Skill Tracking Dashboard
+* Community Features
+* Personalized AI Recommendations
+
+---
+
+# 👨‍💻 Developer
+
+## Ankit Raskar
+
 BCA Student | Web Developer | AI Enthusiast
 
 GitHub:
 https://github.com/Ankit-Raskar
+
+---
