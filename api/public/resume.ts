@@ -1,9 +1,9 @@
-// Vercel Edge Function — Resume Analyzer (Lovable AI Gateway)
+// Vercel Edge Function — Resume Analyzer (Groq, Llama 3.3 70B)
 export const config = { runtime: "edge" };
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const PRIMARY = "google/gemini-3-flash-preview";
-const FALLBACK = "google/gemini-2.5-flash";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const PRIMARY = "llama-3.3-70b-versatile";
+const FALLBACK = "llama-3.1-8b-instant";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -45,7 +45,7 @@ function extractJson(text: string): unknown {
 }
 
 async function callModel(model: string, text: string, key: string) {
-  return fetch(GATEWAY, {
+  return fetch(GROQ_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -63,8 +63,11 @@ async function callModel(model: string, text: string, key: string) {
 export default async function handler(request: Request): Promise<Response> {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
 
-  const KEY = process.env.LOVABLE_API_KEY;
-  if (!KEY) return jsonResponse({ error: "AI service not configured" }, 500);
+  const KEY = process.env.GROQ_API_KEY;
+  if (!KEY) {
+    console.error("[resume] GROQ_API_KEY missing");
+    return jsonResponse({ error: "AI service not configured" }, 500);
+  }
 
   let body: { text: string };
   try {
@@ -77,18 +80,25 @@ export default async function handler(request: Request): Promise<Response> {
     return jsonResponse({ error: "Resume text is too short to analyze" }, 400);
   }
 
-  let r = await callModel(PRIMARY, text, KEY);
-  if (!r.ok && r.status >= 500) r = await callModel(FALLBACK, text, KEY);
+  let r: Response;
+  try {
+    r = await callModel(PRIMARY, text, KEY);
+    if (!r.ok && r.status >= 500) r = await callModel(FALLBACK, text, KEY);
+  } catch (e) {
+    console.error("[resume] network", e);
+    return jsonResponse({ error: "Resume analysis service is temporarily unavailable." }, 502);
+  }
 
   if (!r.ok) {
     const errText = await r.text().catch(() => "");
-    console.error("[resume/ai-gateway] error", r.status, errText.slice(0, 400));
-    const status = r.status === 429 ? 429 : 502;
+    console.error("[resume] groq error", r.status, errText.slice(0, 400));
     const msg =
-      status === 429
+      r.status === 429
         ? "AI is busy right now. Please retry in a moment."
-        : "Resume analysis service is temporarily unavailable.";
-    return jsonResponse({ error: msg }, status);
+        : r.status === 401
+          ? "AI service not configured"
+          : "Resume analysis service is temporarily unavailable.";
+    return jsonResponse({ error: msg }, r.status === 429 ? 429 : 502);
   }
 
   const j = (await r.json()) as { choices?: Array<{ message?: { content?: string } }> };

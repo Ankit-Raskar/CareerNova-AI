@@ -1,4 +1,4 @@
-// Vercel Edge Function — AI Mentor (streaming chat via Lovable AI Gateway)
+// Vercel Edge Function — AI Mentor (streaming chat via Groq, Llama 3 70B)
 export const config = { runtime: "edge" };
 
 const cors = {
@@ -17,13 +17,15 @@ Be warm and concise. Avoid filler. Use Indian + global context where helpful.`;
 export default async function handler(request: Request): Promise<Response> {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
 
-  const KEY = process.env.LOVABLE_API_KEY;
+  const KEY = process.env.GROQ_API_KEY;
   if (!KEY) {
-    return new Response(JSON.stringify({ error: "AI service not configured" }), {
+    console.error("[mentor] GROQ_API_KEY missing");
+    return new Response(JSON.stringify({ error: "Mentor unavailable" }), {
       status: 500,
       headers: { ...cors, "Content-Type": "application/json" },
     });
   }
+
   let body: { messages: Msg[]; context?: string };
   try {
     body = (await request.json()) as { messages: Msg[]; context?: string };
@@ -44,23 +46,39 @@ export default async function handler(request: Request): Promise<Response> {
     ? `${SYSTEM}\n\nUser context (personalize answers using this):\n${body.context}`
     : SYSTEM;
 
-  const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
-      stream: true,
-      temperature: 0.7,
-      messages: [{ role: "system", content: sys }, ...body.messages],
-    }),
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        stream: true,
+        temperature: 0.7,
+        messages: [{ role: "system", content: sys }, ...body.messages],
+      }),
+    });
+  } catch (e) {
+    console.error("[mentor] network", e);
+    return new Response(JSON.stringify({ error: "Mentor is temporarily unavailable." }), {
+      status: 502,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
 
   if (!upstream.ok || !upstream.body) {
     const text = await upstream.text().catch(() => "");
-    return new Response(JSON.stringify({ error: text || "AI error", status: upstream.status }), {
+    console.error("[mentor] groq error", upstream.status, text.slice(0, 400));
+    const msg =
+      upstream.status === 429
+        ? "Mentor is busy right now. Please try again in a moment."
+        : upstream.status === 401
+          ? "Mentor unavailable"
+          : "Mentor is temporarily unavailable.";
+    return new Response(JSON.stringify({ error: msg, status: upstream.status }), {
       status: upstream.status === 429 ? 429 : 500,
       headers: { ...cors, "Content-Type": "application/json" },
     });

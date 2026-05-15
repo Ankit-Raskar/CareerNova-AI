@@ -1,9 +1,9 @@
-// Vercel Edge Function — Unified AI proxy (Lovable AI Gateway)
+// Vercel Edge Function — Unified AI proxy (Groq)
 export const config = { runtime: "edge" };
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const PRIMARY = "google/gemini-3-flash-preview";
-const FALLBACK = "google/gemini-2.5-flash";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const PRIMARY = "llama-3.3-70b-versatile";
+const FALLBACK = "llama-3.1-8b-instant";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -28,8 +28,8 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-async function callGateway(model: string, payload: Record<string, unknown>, key: string) {
-  return fetch(GATEWAY, {
+async function callGroq(model: string, payload: Record<string, unknown>, key: string) {
+  return fetch(GROQ_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({ ...payload, model }),
@@ -40,8 +40,11 @@ export default async function handler(request: Request): Promise<Response> {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (request.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
 
-  const KEY = process.env.LOVABLE_API_KEY;
-  if (!KEY) return jsonResponse({ error: "AI service not configured" }, 500);
+  const KEY = process.env.GROQ_API_KEY;
+  if (!KEY) {
+    console.error("[ai] GROQ_API_KEY missing");
+    return jsonResponse({ error: "AI service not configured" }, 500);
+  }
 
   let body: Body;
   try {
@@ -77,21 +80,27 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const primary = model || PRIMARY;
-  let upstream = await callGateway(primary, payload, KEY);
-  if (!upstream.ok && upstream.status >= 500 && primary !== FALLBACK) {
-    upstream = await callGateway(FALLBACK, payload, KEY);
+  let upstream: Response;
+  try {
+    upstream = await callGroq(primary, payload, KEY);
+    if (!upstream.ok && upstream.status >= 500 && primary !== FALLBACK) {
+      upstream = await callGroq(FALLBACK, payload, KEY);
+    }
+  } catch (e) {
+    console.error("[ai] network error", e);
+    return jsonResponse({ error: "AI service is temporarily unavailable." }, 502);
   }
 
   if (!upstream.ok) {
     const text = await upstream.text().catch(() => "");
-    const status = upstream.status === 429 ? 429 : upstream.status === 402 ? 402 : 502;
+    console.error("[ai] groq error", upstream.status, text.slice(0, 400));
+    const status = upstream.status === 429 ? 429 : upstream.status === 401 ? 500 : 502;
     const msg =
-      status === 429
+      upstream.status === 429
         ? "AI service is temporarily busy. Please try again in a moment."
-        : status === 402
-          ? "AI credits exhausted. Please contact support."
+        : upstream.status === 401
+          ? "AI service not configured"
           : "AI service is temporarily unavailable.";
-    console.error("[ai-gateway] error", upstream.status, text.slice(0, 400));
     return jsonResponse({ error: msg, status: upstream.status }, status);
   }
 
